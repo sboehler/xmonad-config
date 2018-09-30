@@ -1,0 +1,11 @@
+* XMonad config
+
+** Features
+
+- modal keys via recursive submaps
+- customized focusing and swap commands
+- complete type declarations and comments
+
+** License
+
+BSD-3
