@@ -153,6 +153,10 @@ myScratchpads =
        "pavucontrol"
        (className =? "Pavucontrol")
        (customFloating $ center 0.6 0.6)
+  , NS "spotify"
+       "spotify"
+       (className =? "Spotify")
+       (customFloating $ center 0.8 0.8)
   ]
   where center w h = W.RationalRect ((1 - w) / 2) ((1 - h) / 2) w h
 
@@ -241,6 +245,7 @@ myKeys cfg hostname =
        , ("M-l"         , rotSlavesDown)
        , ("M-s <Return>", namedScratchpadAction myScratchpads "termite")
        , ("M-s v"       , namedScratchpadAction myScratchpads "pavucontrol")
+       , ("M-s s"       , namedScratchpadAction myScratchpads "spotify")
        , ("M-b b"       , sendMessage ToggleStruts)
        , ( "M-b f"
          , withFocused float
