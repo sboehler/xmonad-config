@@ -198,8 +198,7 @@ myKeys cfg hostname =
     -- set number of windows in workspace
     ++ map (\n -> ("M-; " <> show n, setLimit $ n + 1)) [0 .. 9]
     -- set backlight brightness
-    ++ map (\n -> ("M-b " <> show n, setBacklight n))
-           [0 .. 9]
+    ++ map (\n -> ("M-b " <> show n, setBacklight n))   [0 .. 9]
     ++ [
     -- managing applications
          ("M-d d", spawn "rofi -show run")
@@ -228,12 +227,14 @@ myKeys cfg hostname =
          , spawn
            "gopass ls --flat | rofi -dmenu -matching fuzzy -sort -sort-levenshtein | xargs --no-run-if-empty gopass otp -c"
          )
-       , ("M-<Delete>"  , spawn "i3lock")
-       , ("M-m"         , windows focusMaster)
-       , ("M-S-m"       , windows W.swapMaster)
-       , ("M-S-k"       , windows W.swapUp)
-       , ("M-S-j"       , windows W.swapDown)
-       , ("M-<Return>"  , windows shiftMaster)
+       , ("M-<Delete>", spawn "i3lock")
+       , ("M-m"       , windows focusMaster)
+       , ("M-S-m"     , windows W.swapMaster)
+       , ("M-S-k"     , windows W.swapUp)
+       , ("M-S-j"     , windows W.swapDown)
+       , ( "M-<Return>"
+         , windows shiftMaster
+         )
        -- rotate slave modal mode - very convenient!
        , ("M-'"         , modal' [("k", rotSlavesUp), ("j", rotSlavesDown)])
        , ("M-h"         , rotSlavesUp)
@@ -241,7 +242,9 @@ myKeys cfg hostname =
        , ("M-s <Return>", namedScratchpadAction myScratchpads "termite")
        , ("M-s v"       , namedScratchpadAction myScratchpads "pavucontrol")
        , ("M-b b"       , sendMessage ToggleStruts)
-       , ("M-b f"       , withFocused float)
+       , ( "M-b f"
+         , withFocused float
+         )
        -- modal mode to move floating windows around
        , ( "M-n"
          , let n = fromIntegral (40 :: Int)
@@ -274,14 +277,24 @@ myKeys cfg hostname =
        , ("<XF86MonBrightnessDown>", spawn "xbacklight -dec 2")
        , ("M-c", modal' [("j", windows W.swapDown), ("k", windows W.swapUp)])
        ]
+
     -- the reason why we need the hostname here: different PA devices
-    ++ if hostname == "pocket"
-         then
+    ++ case hostname of
+         "pocket" ->
            [ ("<XF86AudioMute>"       , spawn "pactl set-sink-mute 1 toggle")
            , ("<XF86AudioLowerVolume>", spawn "pactl set-sink-volume 1 -1.5%")
            , ("<XF86AudioRaiseVolume>", spawn "pactl set-sink-volume 1 +1.5%")
            ]
-         else
+         "tw-pc-silvio" ->
+           [ ( "M-<F9>"
+             , spawn
+               "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause"
+             )
+           , ("M-<F10>", spawn "pactl set-sink-mute 4 toggle")
+           , ("M-<F11>", spawn "pactl set-sink-volume 4 -1.5%")
+           , ("M-<F12>", spawn "pactl set-sink-volume 4 +1.5%")
+           ]
+         _ ->
            [ ("<XF86AudioMute>"       , spawn "pactl set-sink-mute 0 toggle")
            , ("<XF86AudioLowerVolume>", spawn "pactl set-sink-volume 0 -1.5%")
            , ("<XF86AudioRaiseVolume>", spawn "pactl set-sink-volume 0 +1.5%")
@@ -290,9 +303,9 @@ myKeys cfg hostname =
 -- set the backlight - I like 0 to yield 100%
 setBacklight :: Int -> X ()
 setBacklight n = spawn $ "xbacklight -set " <> show (f n)
-  where
-    f 0 = 100
-    f i = 1 + 11 * (i - 1)
+ where
+  f 0 = 100
+  f i = 1 + 11 * (i - 1)
 
 -- Function to generate a modal keymap
 modal :: XConfig a -> [(String, X ())] -> X ()
