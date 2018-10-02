@@ -56,6 +56,7 @@ import           XMonad.Util.NamedScratchpad      (NamedScratchpad (..),
                                                    namedScratchpadManageHook)
 import           XMonad.Util.Paste                (sendKey)
 import           XMonad.Util.Run                  (hPutStrLn, spawnPipe)
+import XMonad.Layout.BoringWindows(boringAuto, BoringWindows,focusUp,focusDown)
 
 
 -- Everything begins at main
@@ -67,7 +68,7 @@ main = do
 
 -- Type of my layouts - not sure there is an easier way
 type MyLayout
-   = ModifiedLayout AvoidStruts (ModifiedLayout SmartBorder (ModifiedLayout FullscreenFull (ToggleLayouts Full (ModifiedLayout Selection (NewSelect ResizableTall (NewSelect (ModifiedLayout Reflect ResizableTall) (NewSelect TwoPane (NewSelect Grid (NewSelect ThreeCol ThreeCol)))))))))
+   = ModifiedLayout AvoidStruts (ModifiedLayout SmartBorder (ModifiedLayout FullscreenFull (ToggleLayouts Full (ModifiedLayout BoringWindows (ModifiedLayout Selection (NewSelect ResizableTall (NewSelect (ModifiedLayout Reflect ResizableTall) (NewSelect TwoPane (NewSelect Grid (NewSelect ThreeCol ThreeCol))))))))))
 
 
 -- Make a config with an xmobar handle and the hostname. Note the
@@ -101,6 +102,7 @@ myLayoutHook =
     . smartBorders
     . fullscreenFull
     . toggleLayouts Full
+    . boringAuto
     . limitSelect 1 5
     $ layouts
 
@@ -243,6 +245,8 @@ myKeys cfg hostname =
        , ("M-'"         , modal' [("k", rotSlavesUp), ("j", rotSlavesDown)])
        , ("M-h"         , rotSlavesUp)
        , ("M-l"         , rotSlavesDown)
+       , ("M-j"         , focusDown)
+       , ("M-k"         , focusUp)
        , ("M-s <Return>", namedScratchpadAction myScratchpads "termite")
        , ("M-s v"       , namedScratchpadAction myScratchpads "pavucontrol")
        , ("M-s s"       , namedScratchpadAction myScratchpads "spotify")
