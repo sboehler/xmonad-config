@@ -299,9 +299,9 @@ myKeys cfg hostname =
              , spawn
                "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause"
              )
-           , ("M-<F10>", spawn "pactl set-sink-mute 4 toggle")
-           , ("M-<F11>", spawn "pactl set-sink-volume 4 -1.5%")
-           , ("M-<F12>", spawn "pactl set-sink-volume 4 +1.5%")
+           , ("M-<F10>", spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+           , ("M-<F11>", spawn "pactl set-sink-volume @DEFAULT_SINK@ -1.5%")
+           , ("M-<F12>", spawn "pactl set-sink-volume @DEFAULT_SINK@ +1.5%")
            ]
          _ ->
            [ ("<XF86AudioMute>"       , spawn "pactl set-sink-mute 0 toggle")
