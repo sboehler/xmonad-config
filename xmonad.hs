@@ -26,6 +26,8 @@ import           XMonad.Hooks.ManageDocks         (AvoidStruts,
                                                    avoidStruts, docks,
                                                    manageDocks)
 import           XMonad.Hooks.SetWMName           (setWMName)
+import           XMonad.Layout.BoringWindows      (BoringWindows, boringAuto,
+                                                   focusDown, focusUp)
 import           XMonad.Layout.Fullscreen         (FullscreenFull,
                                                    fullscreenEventHook,
                                                    fullscreenFull,
@@ -56,7 +58,6 @@ import           XMonad.Util.NamedScratchpad      (NamedScratchpad (..),
                                                    namedScratchpadManageHook)
 import           XMonad.Util.Paste                (sendKey)
 import           XMonad.Util.Run                  (hPutStrLn, spawnPipe)
-import XMonad.Layout.BoringWindows(boringAuto, BoringWindows,focusUp,focusDown)
 
 
 -- Everything begins at main
@@ -307,6 +308,18 @@ myKeys cfg hostname =
            [ ("<XF86AudioMute>"       , spawn "pactl set-sink-mute 0 toggle")
            , ("<XF86AudioLowerVolume>", spawn "pactl set-sink-volume 0 -1.5%")
            , ("<XF86AudioRaiseVolume>", spawn "pactl set-sink-volume 0 +1.5%")
+           , ( "<XF86AudioPlay>"
+             , spawn
+               "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause"
+             )
+           , ( "<XF86AudioNext>"
+             , spawn
+               "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next"
+             )
+           , ( "<XF86AudioPrev>"
+             , spawn
+               "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous"
+             )
            ]
 
 -- set the backlight - I like 0 to yield 100%
