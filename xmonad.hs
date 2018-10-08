@@ -28,10 +28,6 @@ import           XMonad.Hooks.ManageDocks         (AvoidStruts,
 import           XMonad.Hooks.SetWMName           (setWMName)
 import           XMonad.Layout.BoringWindows      (BoringWindows, boringAuto,
                                                    focusDown, focusUp)
-import           XMonad.Layout.Fullscreen         (FullscreenFull,
-                                                   fullscreenEventHook,
-                                                   fullscreenFull,
-                                                   fullscreenManageHook)
 import           XMonad.Layout.Grid               (Grid (..))
 import           XMonad.Layout.LayoutCombinators  (NewSelect, (|||))
 import           XMonad.Layout.LayoutModifier     (ModifiedLayout)
@@ -59,7 +55,6 @@ import           XMonad.Util.NamedScratchpad      (NamedScratchpad (..),
 import           XMonad.Util.Paste                (sendKey)
 import           XMonad.Util.Run                  (hPutStrLn, spawnPipe)
 
-
 -- Everything begins at main
 main :: IO ()
 main = do
@@ -69,8 +64,7 @@ main = do
 
 -- Type of my layouts - not sure there is an easier way
 type MyLayout
-   = ModifiedLayout AvoidStruts (ModifiedLayout SmartBorder (ModifiedLayout FullscreenFull (ToggleLayouts Full (ModifiedLayout BoringWindows (ModifiedLayout Selection (NewSelect ResizableTall (NewSelect (ModifiedLayout Reflect ResizableTall) (NewSelect TwoPane (NewSelect Grid (NewSelect ThreeCol ThreeCol))))))))))
-
+   = ModifiedLayout AvoidStruts (ModifiedLayout SmartBorder (ToggleLayouts Full (ModifiedLayout BoringWindows (ModifiedLayout Selection (NewSelect ResizableTall (NewSelect (ModifiedLayout Reflect ResizableTall) (NewSelect TwoPane (NewSelect Grid (NewSelect ThreeCol ThreeCol)))))))))
 
 -- Make a config with an xmobar handle and the hostname. Note the
 -- config depends on the keys and vice versa - all is good thanks to
@@ -101,12 +95,10 @@ myLayoutHook :: MyLayout Window
 myLayoutHook =
   avoidStruts
     . smartBorders
-    . fullscreenFull
     . toggleLayouts Full
     . boringAuto
     . limitSelect 1 5
     $ layouts
-
 
 -- The type of my layouts - not sure there is an easier way to express this
 type MyLayouts a
@@ -125,7 +117,6 @@ layouts =
   grid          = Grid
   φ             = realToFrac ((1.0 + sqrt 5) / 2.0 :: Double)
 
-
 -- LG3D is needed for Java applications. TODO: The checkKeymap is according
 -- to docs but doesn't seem to have an effect.
 mkStartupHook :: XConfig l -> [(String, X ())] -> X ()
@@ -134,16 +125,10 @@ mkStartupHook c k =
 
 -- all pretty standard
 myManageHook :: ManageHook
-myManageHook =
-  def
-    <+> manageDocks
-    <+> manageGimp
-    <+> fullscreenManageHook
-    <+> manageScratchPad
+myManageHook = def <+> manageDocks <+> manageGimp <+> manageScratchPad
  where
   manageGimp       = composeAll [className =? "Gimp" --> doFloat]
   manageScratchPad = namedScratchpadManageHook myScratchpads
-
 
 -- scratchpads, see the docs of NamedScratchpad
 myScratchpads :: [NamedScratchpad]
@@ -163,7 +148,6 @@ myScratchpads =
   ]
   where center w h = W.RationalRect ((1 - w) / 2) ((1 - h) / 2) w h
 
-
 -- Log hook which hides the workspace named "NSP" (scratchpad) and
 -- which sets the mouse pointer in the middle of a window on focus
 -- change
@@ -178,21 +162,18 @@ mkLogHook h =
         dynamicLogWithPP pp
         updatePointer (0.5, 0.5) (0, 0)
 
-
 myHandleEventHook :: Event -> X All
-myHandleEventHook = handleEventHook def <+> fullscreenEventHook
+myHandleEventHook = handleEventHook def
 
 -- key configuration with modal submaps: once you type the prefix, you
 -- remain in that "mode" for as long as you press keys defined in that
 -- model.
 myKeys :: XConfig a -> String -> [(String, X ())]
 myKeys cfg hostname =
-  let
-    modal' = modal cfg
+  let modal' = modal cfg
+        -- manage workspaces
   in
-    [
-    -- manage workspaces
-      ("M-u"  , moveTo Prev (WSIs $ return ((/= "NSP") . W.tag)))
+    [ ("M-u"  , moveTo Prev (WSIs $ return ((/= "NSP") . W.tag)))
     , ("M-i"  , moveTo Next (WSIs $ return ((/= "NSP") . W.tag)))
     , ("M-; ;", spawn "rofi -show window")
     , ("M-; a", addWorkspacePrompt myXPConfig)
@@ -206,9 +187,9 @@ myKeys cfg hostname =
     ++ map (\n -> ("M-; " <> show n, setLimit $ n + 1)) [0 .. 9]
     -- set backlight brightness
     ++ map (\n -> ("M-b " <> show n, setBacklight n))   [0 .. 9]
-    ++ [
+    ++
     -- managing applications
-         ("M-d d", spawn "rofi -show run")
+       [ ("M-d d", spawn "rofi -show run")
        , ("M-d e", spawn "emacsclient -c")
        , ("M-d t", spawn "termite")
        , ("M-d f", spawn "firefox")
@@ -225,8 +206,8 @@ myKeys cfg hostname =
            , ("j", sendKey (controlMask .|. shiftMask) xK_Tab)
            ]
          )
-       , -- manage passwords & otp keys
-         ( "M-p p"
+         -- manage passwords & otp keys
+       , ( "M-p p"
          , spawn
            "gopass ls --flat | rofi -dmenu -matching fuzzy -sort -sort-levenshtein | xargs --no-run-if-empty gopass show -c"
          )
@@ -243,15 +224,15 @@ myKeys cfg hostname =
          , windows shiftMaster
          )
        -- rotate slave modal mode - very convenient!
-       , ("M-'"         , modal' [("k", rotSlavesUp), ("j", rotSlavesDown)])
-       , ("M-h"         , rotSlavesUp)
-       , ("M-l"         , rotSlavesDown)
-       , ("M-j"         , focusDown)
-       , ("M-k"         , focusUp)
+       , ("M-'", modal' [("k", rotSlavesUp), ("j", rotSlavesDown)])
+       , ("M-h", rotSlavesUp)
+       , ("M-l", rotSlavesDown)
+       , ("M-j", focusDown)
+       , ("M-k", focusUp)
        , ("M-s <Return>", namedScratchpadAction myScratchpads "termite")
-       , ("M-s v"       , namedScratchpadAction myScratchpads "pavucontrol")
-       , ("M-s s"       , namedScratchpadAction myScratchpads "spotify")
-       , ("M-b b"       , sendMessage ToggleStruts)
+       , ("M-s v", namedScratchpadAction myScratchpads "pavucontrol")
+       , ("M-s s", namedScratchpadAction myScratchpads "spotify")
+       , ("M-b b", sendMessage ToggleStruts)
        , ( "M-b f"
          , withFocused float
          )
@@ -281,13 +262,12 @@ myKeys cfg hostname =
            , ("l", sendMessage Expand)
            ]
          )
-       , ("M-S-s"                  , withFocused (sendMessage . tallWindowAlt))
-       , ("M-S-d"                  , withFocused (sendMessage . wideWindowAlt))
-       , ("<XF86MonBrightnessUp>"  , spawn "xbacklight -inc 2")
+       , ("M-S-s", withFocused (sendMessage . tallWindowAlt))
+       , ("M-S-d", withFocused (sendMessage . wideWindowAlt))
+       , ("<XF86MonBrightnessUp>", spawn "xbacklight -inc 2")
        , ("<XF86MonBrightnessDown>", spawn "xbacklight -dec 2")
        , ("M-c", modal' [("j", windows W.swapDown), ("k", windows W.swapUp)])
        ]
-
     -- the reason why we need the hostname here: different PA devices
     ++ case hostname of
          "pocket" ->
@@ -371,17 +351,17 @@ solarized key =
 -- swap the topmost windows in that case
 focusMaster :: W.StackSet i l a s sd -> W.StackSet i l a s sd
 focusMaster = W.modify' $ \c -> case c of
-  W.Stack t [] (x:xs) -> W.Stack x [] (t : xs)
-  W.Stack _ [] _      -> c
-  W.Stack t ls rs     -> W.Stack x [] (xs ++ t : rs) where (x:xs) = reverse ls
+  W.Stack t [] (x : xs) -> W.Stack x [] (t : xs)
+  W.Stack _ [] _ -> c
+  W.Stack t ls rs -> W.Stack x [] (xs ++ t : rs) where (x : xs) = reverse ls
 
 -- Customized shiftMaster with the same behavior as focusMaster if the
 -- master is already in focus
 shiftMaster :: W.StackSet i l a s sd -> W.StackSet i l a s sd
 shiftMaster = W.modify' $ \c -> case c of
-  W.Stack t [] (x:xs) -> W.Stack x [] (t : xs)
-  W.Stack _ [] _      -> c     -- already master.
-  W.Stack t ls rs     -> W.Stack t [] (reverse ls ++ rs)
+  W.Stack t [] (x : xs) -> W.Stack x [] (t : xs)
+  W.Stack _ [] _        -> c -- already master.
+  W.Stack t ls rs       -> W.Stack t [] (reverse ls ++ rs)
 
 -- Some hack from
 -- https://www.reddit.com/r/xmonad/comments/77szad/cant_go_fullscreen_in_firefox_even_with_ewmh/

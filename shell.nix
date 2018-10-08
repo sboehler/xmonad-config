@@ -1,6 +1,5 @@
 {
   nixpkgs ? import <nixpkgs> {},
-  compiler ? "ghc822",
   withHoogle ? true
 }:
 
@@ -10,7 +9,7 @@ let
 
   f = import ./default.nix;
 
-  haskellPackages = pkgs.haskell.packages.${compiler};
+  haskellPackages = pkgs.haskellPackages;
 
   hspkgs = (
       if withHoogle then
