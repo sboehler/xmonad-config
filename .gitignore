@@ -1,6 +1,7 @@
 *
 !.gitignore
 !shell.nix
+!default.nix
 !xmonad.hs
 !xmonad-config.cabal
 !README.org

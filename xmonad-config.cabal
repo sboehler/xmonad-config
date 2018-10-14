@@ -19,8 +19,8 @@ executable xmonad-config
   main-is:             xmonad.hs
   -- other-modules:
   -- other-extensions:
-  ghc-options:         -Wall 
-  build-depends:       base >=4.10 && <4.11
+  ghc-options:         -Wall
+  build-depends:       base
                      , containers
                      , hostname
                      , xmonad
