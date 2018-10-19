@@ -275,7 +275,7 @@ myKeys cfg hostname =
            , ("<XF86AudioLowerVolume>", spawn "pactl set-sink-volume 1 -1.5%")
            , ("<XF86AudioRaiseVolume>", spawn "pactl set-sink-volume 1 +1.5%")
            ]
-         "tw-pc-silvio" ->
+         "worky-mcworkface" ->
            [ ( "M-<F9>"
              , spawn
                "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause"
