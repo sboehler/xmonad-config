@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 
 import           Control.Monad                            ( replicateM_ )
 import           Data.Map                                 ( fromList
@@ -35,8 +36,7 @@ import           XMonad.Hooks.DynamicLog                  ( PP(..)
                                                           , xmobarPP
                                                           )
 import           XMonad.Hooks.EwmhDesktops                ( ewmh )
-import           XMonad.Hooks.ManageDocks                 ( AvoidStruts
-                                                          , ToggleStruts
+import           XMonad.Hooks.ManageDocks                 ( ToggleStruts
                                                             ( ToggleStruts
                                                             )
                                                           , avoidStruts
@@ -44,27 +44,20 @@ import           XMonad.Hooks.ManageDocks                 ( AvoidStruts
                                                           , manageDocks
                                                           )
 import           XMonad.Hooks.SetWMName                   ( setWMName )
-import           XMonad.Layout.BoringWindows              ( BoringWindows
-                                                          , boringAuto
+import           XMonad.Layout.BoringWindows              ( boringWindows
                                                           , focusDown
                                                           , focusUp
                                                           )
 import           XMonad.Layout.Grid                       ( Grid(..) )
-import           XMonad.Layout.LayoutCombinators          ( NewSelect
-                                                          , (|||)
-                                                          )
-import           XMonad.Layout.LayoutModifier             ( ModifiedLayout )
-import           XMonad.Layout.LimitWindows               ( Selection
-                                                          , limitSelect
+import           XMonad.Layout.LayoutCombinators          ( (|||) )
+import           XMonad.Layout.LimitWindows               ( limitSelect
                                                           , setLimit
                                                           )
 import           XMonad.Layout.MosaicAlt                  ( tallWindowAlt
                                                           , wideWindowAlt
                                                           )
-import           XMonad.Layout.NoBorders
-import           XMonad.Layout.Reflect                    ( Reflect
-                                                          , reflectHoriz
-                                                          )
+import           XMonad.Layout.NoBorders                  ( smartBorders )
+import           XMonad.Layout.Reflect                    ( reflectHoriz )
 import           XMonad.Layout.ResizableTile              ( MirrorResize
                                                             ( MirrorExpand
                                                             , MirrorShrink
@@ -73,7 +66,6 @@ import           XMonad.Layout.ResizableTile              ( MirrorResize
                                                           )
 import           XMonad.Layout.ThreeColumns               ( ThreeCol(..) )
 import           XMonad.Layout.ToggleLayouts              ( ToggleLayout(..)
-                                                          , ToggleLayouts
                                                           , toggleLayouts
                                                           )
 import           XMonad.Layout.TwoPane                    ( TwoPane(..) )
@@ -93,8 +85,7 @@ import           XMonad.Util.NamedScratchpad              ( NamedScratchpad(..)
                                                           , namedScratchpadAction
                                                           , namedScratchpadManageHook
                                                           )
-import           XMonad.Layout.Fullscreen                 ( FullscreenFull
-                                                          , fullscreenEventHook
+import           XMonad.Layout.Fullscreen                 ( fullscreenEventHook
                                                           , fullscreenFull
                                                           , fullscreenManageHook
                                                           )
@@ -104,20 +95,14 @@ import           XMonad.Util.Run                          ( hPutStrLn
                                                           )
 
 -- Everything begins at main
-main :: IO ()
 main = do
   hostname <- getHostName
   handle   <- spawnPipe "xmobar"
   xmonad $ mkConfig handle hostname
 
--- Type of my layouts - not sure there is an easier way
-type MyLayout
-   = ModifiedLayout AvoidStruts (ModifiedLayout SmartBorder (ModifiedLayout FullscreenFull (ToggleLayouts Full (ModifiedLayout BoringWindows (ModifiedLayout Selection (NewSelect ResizableTall (NewSelect (ModifiedLayout Reflect ResizableTall) (NewSelect TwoPane (NewSelect Grid (NewSelect ThreeCol ThreeCol))))))))))
-
 -- Make a config with an xmobar handle and the hostname. Note the
 -- config depends on the keys and vice versa - all is good thanks to
 -- Haskell's lazyness!
-mkConfig :: Handle -> String -> XConfig MyLayout
 mkConfig handle hostname = ewmh . docks $ myConfig
  where
   keyconfig = myKeys myConfig hostname
@@ -139,22 +124,17 @@ mkConfig handle hostname = ewmh . docks $ myConfig
 -- Layout hook - all quite standard, note the use of limitSelect (I
 -- have a key-binding to limit the windows defined below, which is
 -- pretty handy)
-myLayoutHook :: MyLayout Window
 myLayoutHook =
-  avoidStruts
-    . smartBorders
+  smartBorders
+    . avoidStruts
     . fullscreenFull
     . toggleLayouts Full
-    . boringAuto
     . limitSelect 1 5
     $ layouts
 
 -- The type of my layouts - not sure there is an easier way to express this
-type MyLayouts a
-   = NewSelect ResizableTall (NewSelect (ModifiedLayout Reflect ResizableTall) (NewSelect TwoPane (NewSelect Grid (NewSelect ThreeCol ThreeCol)))) a
 
 -- Layouts
-layouts :: MyLayouts a
 layouts =
   tall ||| reflectedTall ||| twopane ||| grid ||| threecol ||| threecolmid
  where
@@ -168,7 +148,6 @@ layouts =
 
 -- LG3D is needed for Java applications. TODO: The checkKeymap is according
 -- to docs but doesn't seem to have an effect.
-mkStartupHook :: XConfig l -> [(String, X ())] -> X ()
 mkStartupHook c k =
   setWMName "LG3D" <+> setFullscreenSupported >> return () >> checkKeymap c k
 
@@ -225,7 +204,7 @@ myHandleEventHook = handleEventHook def <+> fullscreenEventHook
 myKeys :: XConfig a -> String -> [(String, X ())]
 myKeys cfg hostname =
   let modal' = modal cfg
-                -- manage workspaces
+                        -- manage workspaces
   in
     [ ("M-u"  , moveTo Prev (WSIs $ return ((/= "NSP") . W.tag)))
     , ("M-i"  , moveTo Next (WSIs $ return ((/= "NSP") . W.tag)))
@@ -270,19 +249,21 @@ myKeys cfg hostname =
            "gopass ls --flat | rofi -dmenu -matching fuzzy -sort -sort-levenshtein | xargs --no-run-if-empty gopass otp -c"
          )
        , ("M-<Delete>", spawn "i3lock")
-       , ("M-m"       , windows focusMaster)
-       , ("M-S-m"     , windows W.swapMaster)
-       , ("M-S-k"     , windows W.swapUp)
-       , ("M-S-j"     , windows W.swapDown)
+       , ("M-m", windows focusMaster)
+       , ("M-S-m", windows W.swapMaster)
+       , ("M-S-k", windows W.swapUp)
+       , ("M-S-j", windows W.swapDown)
        , ( "M-<Return>"
          , windows shiftMaster
          )
        -- rotate slave modal mode - very convenient!
        , ("M-'", modal' [("k", rotSlavesUp), ("j", rotSlavesDown)])
        , ("M-h", rotSlavesUp)
-       , ("M-l", rotSlavesDown)
-       , ("M-j", focusDown)
-       , ("M-k", focusUp)
+       , ( "M-l"
+         , rotSlavesDown
+         )
+--       , ("M-j", focusDown)
+--       , ("M-k", focusUp)
        , ("M-s <Return>", namedScratchpadAction myScratchpads "termite")
        , ("M-s v", namedScratchpadAction myScratchpads "pavucontrol")
        , ("M-s s", namedScratchpadAction myScratchpads "spotify")
