@@ -186,9 +186,11 @@ myScratchpads =
 -- change
 mkLogHook :: Handle -> X ()
 mkLogHook h =
-  let noScratchpad ws = if ws == "NSP" then "" else ws
+  let noScratchpad ws = if ws == "NSP" then "" else " " ++ ws ++ " "
       pp = xmobarPP { ppOutput          = hPutStrLn h
+                    , ppWsSep = ""
                     , ppHidden          = noScratchpad
+                    , ppSep = " | "
                     , ppHiddenNoWindows = noScratchpad
                     }
   in  do
