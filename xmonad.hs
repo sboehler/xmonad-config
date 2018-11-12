@@ -136,10 +136,14 @@ myLayoutHook =
 
 -- Layouts
 layouts =
-  tall ||| reflectedTall ||| twopane ||| grid ||| threecol ||| threecolmid
+  tall
+    ||| reflectedTall
+    ||| mirrorTall
+    ||| threecolmid
  where
   tall          = ResizableTall 1 0.03 (φ / (1 + φ)) []
   reflectedTall = reflectHoriz tall
+  mirrorTall    = Mirror (ResizableTall 1 0.03 (φ / (1 + φ)) [])
   threecol      = ThreeCol 1 (3 / 100) (1 / 2)
   threecolmid   = ThreeColMid 1 (3 / 100) (1 / 2)
   twopane       = TwoPane 0.03 (1 / φ)
@@ -188,9 +192,9 @@ mkLogHook :: Handle -> X ()
 mkLogHook h =
   let noScratchpad ws = if ws == "NSP" then "" else " " ++ ws ++ " "
       pp = xmobarPP { ppOutput          = hPutStrLn h
-                    , ppWsSep = ""
+                    , ppWsSep           = ""
                     , ppHidden          = noScratchpad
-                    , ppSep = " | "
+                    , ppSep             = " | "
                     , ppHiddenNoWindows = noScratchpad
                     }
   in  do
@@ -206,7 +210,7 @@ myHandleEventHook = handleEventHook def <+> fullscreenEventHook
 myKeys :: XConfig a -> String -> [(String, X ())]
 myKeys cfg hostname =
   let modal' = modal cfg
-                        -- manage workspaces
+                            -- manage workspaces
   in
     [ ("M-u"  , moveTo Prev (WSIs $ return ((/= "NSP") . W.tag)))
     , ("M-i"  , moveTo Next (WSIs $ return ((/= "NSP") . W.tag)))
