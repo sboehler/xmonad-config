@@ -44,11 +44,6 @@ import           XMonad.Hooks.ManageDocks                 ( ToggleStruts
                                                           , manageDocks
                                                           )
 import           XMonad.Hooks.SetWMName                   ( setWMName )
-import           XMonad.Layout.BoringWindows              ( boringWindows
-                                                          , focusDown
-                                                          , focusUp
-                                                          )
-import           XMonad.Layout.Grid                       ( Grid(..) )
 import           XMonad.Layout.LayoutCombinators          ( (|||) )
 import           XMonad.Layout.LimitWindows               ( limitSelect
                                                           , setLimit
@@ -68,7 +63,6 @@ import           XMonad.Layout.ThreeColumns               ( ThreeCol(..) )
 import           XMonad.Layout.ToggleLayouts              ( ToggleLayout(..)
                                                           , toggleLayouts
                                                           )
-import           XMonad.Layout.TwoPane                    ( TwoPane(..) )
 import           XMonad.Prompt                            ( XPConfig(..)
                                                           , XPPosition(..)
                                                           , font
@@ -144,10 +138,7 @@ layouts =
   tall          = ResizableTall 1 0.03 (φ / (1 + φ)) []
   reflectedTall = reflectHoriz tall
   mirrorTall    = Mirror (ResizableTall 1 0.03 (φ / (1 + φ)) [])
-  threecol      = ThreeCol 1 (3 / 100) (1 / 2)
   threecolmid   = ThreeColMid 1 (3 / 100) (1 / 2)
-  twopane       = TwoPane 0.03 (1 / φ)
-  grid          = Grid
   φ             = realToFrac ((1.0 + sqrt 5) / 2.0 :: Double)
 
 -- LG3D is needed for Java applications. TODO: The checkKeymap is according
@@ -249,6 +240,10 @@ myKeys cfg hostname =
        , ( "M-p p"
          , spawn
            "gopass ls --flat | rofi -dmenu -matching fuzzy -sort -sort-levenshtein | xargs --no-run-if-empty gopass show -c"
+         )
+       , ( "M-p l"
+         , spawn
+           "gopass ls --flat | rofi -dmenu -matching fuzzy -sort -sort-levenshtein | xargs --no-run-if-empty gopass show login -c"
          )
        , ( "M-p o"
          , spawn
