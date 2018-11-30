@@ -268,6 +268,8 @@ myKeys cfg hostname =
        , ("M-s <Return>", namedScratchpadAction myScratchpads "termite")
        , ("M-s v", namedScratchpadAction myScratchpads "pavucontrol")
        , ("M-s s", namedScratchpadAction myScratchpads "spotify")
+       , ("M-s n", spawn "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next")
+       , ("M-s p", spawn "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous")
        , ("M-b b", sendMessage ToggleStruts)
        , ( "M-b f"
          , withFocused float
