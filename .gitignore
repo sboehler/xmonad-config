@@ -3,5 +3,7 @@
 !shell.nix
 !default.nix
 !xmonad.hs
+!taffybar.hs
+!taffybar.css
 !xmonad-config.cabal
 !README.org

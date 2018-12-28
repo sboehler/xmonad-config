@@ -1,5 +1,5 @@
-{ mkDerivation, base, containers, hostname, stdenv, xmonad
-, xmonad-contrib
+{ mkDerivation, base, containers, hostname, stdenv, taffybar
+, xmonad, xmonad-contrib
 }:
 mkDerivation {
   pname = "xmonad-config";
@@ -8,7 +8,7 @@ mkDerivation {
   isLibrary = false;
   isExecutable = true;
   executableHaskellDepends = [
-    base containers hostname xmonad xmonad-contrib
+    base containers hostname taffybar xmonad xmonad-contrib
   ];
   license = stdenv.lib.licenses.bsd3;
 }

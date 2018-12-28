@@ -1,103 +1,95 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 
-import           Control.Monad                            ( replicateM_ )
-import           Data.Map                                 ( fromList
-                                                          , (!)
-                                                          )
-import           Data.Monoid                              ( All
-                                                          , (<>)
-                                                          )
-import           GHC.IO.Handle.Types                      ( Handle )
-import           Network.HostName                         ( getHostName )
-import           XMonad                            hiding ( (|||) )
-import           XMonad.Actions.CopyWindow                ( copy
-                                                          , kill1
-                                                          )
-import           XMonad.Actions.CycleWS                   ( Direction1D(..)
-                                                          , WSType(..)
-                                                          , moveTo
-                                                          )
-import           XMonad.Actions.DynamicWorkspaces         ( addWorkspacePrompt
-                                                          , removeEmptyWorkspace
-                                                          , renameWorkspace
-                                                          , withWorkspace
-                                                          )
-import           XMonad.Actions.FloatKeys                 ( keysMoveWindow
-                                                          , keysResizeWindow
-                                                          )
-import           XMonad.Actions.RotSlaves                 ( rotSlavesDown
-                                                          , rotSlavesUp
-                                                          )
-import           XMonad.Actions.Submap                    ( submap )
-import           XMonad.Actions.UpdatePointer             ( updatePointer )
-import           XMonad.Hooks.DynamicLog                  ( PP(..)
-                                                          , dynamicLogWithPP
-                                                          , xmobarPP
-                                                          )
-import           XMonad.Hooks.EwmhDesktops                ( ewmh )
-import           XMonad.Hooks.ManageDocks                 ( ToggleStruts
-                                                            ( ToggleStruts
-                                                            )
-                                                          , avoidStruts
-                                                          , docks
-                                                          , manageDocks
-                                                          )
-import           XMonad.Hooks.SetWMName                   ( setWMName )
-import           XMonad.Layout.LayoutCombinators          ( (|||) )
-import           XMonad.Layout.LimitWindows               ( limitSelect
-                                                          , setLimit
-                                                          )
-import           XMonad.Layout.MosaicAlt                  ( tallWindowAlt
-                                                          , wideWindowAlt
-                                                          )
-import           XMonad.Layout.NoBorders                  ( smartBorders )
-import           XMonad.Layout.Reflect                    ( reflectHoriz )
-import           XMonad.Layout.ResizableTile              ( MirrorResize
-                                                            ( MirrorExpand
-                                                            , MirrorShrink
-                                                            )
-                                                          , ResizableTall(..)
-                                                          )
-import           XMonad.Layout.ThreeColumns               ( ThreeCol(..) )
-import           XMonad.Layout.ToggleLayouts              ( ToggleLayout(..)
-                                                          , toggleLayouts
-                                                          )
-import           XMonad.Prompt                            ( XPConfig(..)
-                                                          , XPPosition(..)
-                                                          , font
-                                                          , height
-                                                          , position
-                                                          )
+import           Control.Monad                  ( replicateM_ )
+import           Data.Map                       ( fromList
+                                                , (!)
+                                                )
+import           Data.Monoid                    ( All
+                                                , (<>)
+                                                )
+import           Network.HostName               ( getHostName )
+import           XMonad                  hiding ( (|||) )
+import           XMonad.Actions.CopyWindow      ( copy
+                                                , kill1
+                                                )
+import           XMonad.Actions.CycleWS         ( Direction1D(..)
+                                                , WSType(..)
+                                                , moveTo
+                                                )
+import           XMonad.Actions.DynamicWorkspaces
+                                                ( addWorkspacePrompt
+                                                , removeEmptyWorkspace
+                                                , renameWorkspace
+                                                , withWorkspace
+                                                )
+import           XMonad.Actions.FloatKeys       ( keysMoveWindow
+                                                , keysResizeWindow
+                                                )
+import           XMonad.Actions.RotSlaves       ( rotSlavesDown
+                                                , rotSlavesUp
+                                                )
+import           XMonad.Actions.Submap          ( submap )
+import           XMonad.Actions.UpdatePointer   ( updatePointer )
+import           XMonad.Hooks.EwmhDesktops      ( ewmh )
+import           XMonad.Hooks.ManageDocks       ( ToggleStruts(ToggleStruts)
+                                                , avoidStruts
+                                                , docks
+                                                , manageDocks
+                                                )
+import           XMonad.Hooks.SetWMName         ( setWMName )
+import           XMonad.Layout.LayoutCombinators
+                                                ( (|||) )
+import           XMonad.Layout.LimitWindows     ( limitSelect
+                                                , setLimit
+                                                )
+import           XMonad.Layout.MosaicAlt        ( tallWindowAlt
+                                                , wideWindowAlt
+                                                )
+import           XMonad.Layout.NoBorders        ( smartBorders )
+import           XMonad.Layout.Reflect          ( reflectHoriz )
+import           XMonad.Layout.ResizableTile    ( MirrorResize
+                                                  ( MirrorExpand
+                                                  , MirrorShrink
+                                                  )
+                                                , ResizableTall(..)
+                                                )
+import           XMonad.Layout.ThreeColumns     ( ThreeCol(..) )
+import           XMonad.Layout.ToggleLayouts    ( ToggleLayout(..)
+                                                , toggleLayouts
+                                                )
+import           XMonad.Prompt                  ( XPConfig(..)
+                                                , XPPosition(..)
+                                                , font
+                                                , height
+                                                , position
+                                                )
 import qualified XMonad.StackSet               as W
-import           XMonad.Util.EZConfig                     ( additionalKeysP
-                                                          , checkKeymap
-                                                          , mkKeymap
-                                                          )
-import           XMonad.Util.NamedScratchpad              ( NamedScratchpad(..)
-                                                          , customFloating
-                                                          , namedScratchpadAction
-                                                          , namedScratchpadManageHook
-                                                          )
-import           XMonad.Layout.Fullscreen                 ( fullscreenEventHook
-                                                          , fullscreenFull
-                                                          , fullscreenManageHook
-                                                          )
-import           XMonad.Util.Paste                        ( sendKey )
-import           XMonad.Util.Run                          ( hPutStrLn
-                                                          , spawnPipe
-                                                          )
+import           XMonad.Util.EZConfig           ( additionalKeysP
+                                                , checkKeymap
+                                                , mkKeymap
+                                                )
+import           XMonad.Util.NamedScratchpad    ( NamedScratchpad(..)
+                                                , customFloating
+                                                , namedScratchpadAction
+                                                , namedScratchpadManageHook
+                                                )
+import           XMonad.Layout.Fullscreen       ( fullscreenEventHook
+                                                , fullscreenFull
+                                                , fullscreenManageHook
+                                                )
+import           XMonad.Util.Paste              ( sendKey )
+import           System.Taffybar.Support.PagerHints
+                                                ( pagerHints )
+
 
 -- Everything begins at main
-main = do
-  hostname <- getHostName
-  handle   <- spawnPipe "xmobar"
-  xmonad $ mkConfig handle hostname
+main = getHostName >>= xmonad . mkConfig
 
 -- Make a config with an xmobar handle and the hostname. Note the
 -- config depends on the keys and vice versa - all is good thanks to
 -- Haskell's lazyness!
-mkConfig handle hostname = ewmh . docks $ myConfig
+mkConfig hostname = docks . ewmh . pagerHints $ myConfig
  where
   keyconfig = myKeys myConfig hostname
   myConfig =
@@ -107,7 +99,7 @@ mkConfig handle hostname = ewmh . docks $ myConfig
         , borderWidth        = 3
         , modMask            = mod4Mask
         , workspaces         = show <$> [1 :: Int .. 3]
-        , logHook            = mkLogHook handle
+        , logHook            = mkLogHook
         , manageHook         = myManageHook
         , layoutHook         = myLayoutHook
         , startupHook        = mkStartupHook myConfig keyconfig
@@ -129,11 +121,7 @@ myLayoutHook =
 -- The type of my layouts - not sure there is an easier way to express this
 
 -- Layouts
-layouts =
-  tall
-    ||| reflectedTall
-    ||| mirrorTall
-    ||| threecolmid
+layouts = tall ||| reflectedTall ||| mirrorTall ||| threecolmid
  where
   tall          = ResizableTall 1 0.03 (φ / (1 + φ)) []
   reflectedTall = reflectHoriz tall
@@ -179,18 +167,8 @@ myScratchpads =
 -- Log hook which hides the workspace named "NSP" (scratchpad) and
 -- which sets the mouse pointer in the middle of a window on focus
 -- change
-mkLogHook :: Handle -> X ()
-mkLogHook h =
-  let noScratchpad ws = if ws == "NSP" then "" else " " ++ ws ++ " "
-      pp = xmobarPP { ppOutput          = hPutStrLn h
-                    , ppWsSep           = ""
-                    , ppHidden          = noScratchpad
-                    , ppSep             = " | "
-                    , ppHiddenNoWindows = noScratchpad
-                    }
-  in  do
-        dynamicLogWithPP pp
-        updatePointer (0.5, 0.5) (0, 0)
+mkLogHook :: X ()
+mkLogHook = updatePointer (0.5, 0.5) (0, 0)
 
 myHandleEventHook :: Event -> X All
 myHandleEventHook = handleEventHook def <+> fullscreenEventHook
@@ -201,7 +179,7 @@ myHandleEventHook = handleEventHook def <+> fullscreenEventHook
 myKeys :: XConfig a -> String -> [(String, X ())]
 myKeys cfg hostname =
   let modal' = modal cfg
-                            -- manage workspaces
+                                    -- manage workspaces
   in
     [ ("M-u"  , moveTo Prev (WSIs $ return ((/= "NSP") . W.tag)))
     , ("M-i"  , moveTo Next (WSIs $ return ((/= "NSP") . W.tag)))
@@ -250,10 +228,10 @@ myKeys cfg hostname =
            "gopass ls --flat | rofi -dmenu -matching fuzzy -sort -sort-levenshtein | xargs --no-run-if-empty gopass otp -c"
          )
        , ("M-<Delete>", spawn "i3lock")
-       , ("M-m", windows focusMaster)
-       , ("M-S-m", windows W.swapMaster)
-       , ("M-S-k", windows W.swapUp)
-       , ("M-S-j", windows W.swapDown)
+       , ("M-m"       , windows focusMaster)
+       , ("M-S-m"     , windows W.swapMaster)
+       , ("M-S-k"     , windows W.swapUp)
+       , ("M-S-j"     , windows W.swapDown)
        , ( "M-<Return>"
          , windows shiftMaster
          )
@@ -268,8 +246,14 @@ myKeys cfg hostname =
        , ("M-s <Return>", namedScratchpadAction myScratchpads "termite")
        , ("M-s v", namedScratchpadAction myScratchpads "pavucontrol")
        , ("M-s s", namedScratchpadAction myScratchpads "spotify")
-       , ("M-s n", spawn "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next")
-       , ("M-s p", spawn "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous")
+       , ( "M-s n"
+         , spawn
+           "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next"
+         )
+       , ( "M-s p"
+         , spawn
+           "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous"
+         )
        , ("M-s w", spawn "wpa_gui")
        , ("M-b b", sendMessage ToggleStruts)
        , ( "M-b f"
